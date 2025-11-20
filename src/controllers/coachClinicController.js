@@ -9,7 +9,7 @@ exports.createClinic = async (req, res) => {
     const image = req.file ? req.file.filename : null;
     const clinic = new CoachClinic({ title, coach, date, description, image });
     await clinic.save();
-    res.status(201).json({ ...clinic._doc, image_url: image ? `${req.protocol}://${req.get("host")}/uploads/${image}` : null });
+   res.status(201).json({ ...clinic._doc, image_url: image ? `https://phmin-backend-production.up.railway.app/uploads/${image}` : null });
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
 
@@ -17,7 +17,7 @@ exports.createClinic = async (req, res) => {
 exports.getClinics = async (req, res) => {
   try {
     const clinics = await CoachClinic.find().sort({ createdAt: -1 });
-    res.json(clinics.map(c => ({ ...c._doc, image_url: c.image ? `${req.protocol}://${req.get("host")}/uploads/${c.image}` : null })));
+    res.json(clinics.map(c => ({ ...c._doc, image_url: c.image ? `https://phmin-backend-production.up.railway.app/uploads/${c.image}` : null })));
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
 
@@ -26,7 +26,7 @@ exports.getClinicById = async (req, res) => {
   try {
     const clinic = await CoachClinic.findById(req.params.id);
     if (!clinic) return res.status(404).json({ message: "Coach Clinic not found" });
-    res.json({ ...clinic._doc, image_url: clinic.image ? `${req.protocol}://${req.get("host")}/uploads/${clinic.image}` : null });
+    res.json({ ...clinic._doc, image_url: clinic.image ? `https://phmin-backend-production.up.railway.app/uploads/${clinic.image}` : null });
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
 
@@ -49,7 +49,7 @@ exports.updateClinic = async (req, res) => {
     clinic.description = description || clinic.description;
 
     await clinic.save();
-    res.json({ ...clinic._doc, image_url: clinic.image ? `${req.protocol}://${req.get("host")}/uploads/${clinic.image}` : null });
+    res.json({ ...clinic._doc, image_url: clinic.image ? `https://phmin-backend-production.up.railway.app/uploads/${clinic.image}` : null });
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
 

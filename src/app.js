@@ -13,13 +13,18 @@ const jadwalRoutes = require('./routes/jadwalRoutes');
 
 const app = express();
 
-// CORS config
-const allowedOrigin = process.env.CLIENT_URL || true;
-
+// CORS FIXED
 app.use(cors({
-  origin: allowedOrigin,
+  origin: [
+    "https://pickleballhouse.id",
+    "https://www.pickleballhouse.id",
+    "https://pickleballhouse.id/pickleball",
+    "https://www.pickleballhouse.id/pickleball"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

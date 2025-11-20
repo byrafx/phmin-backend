@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 const protect = require("../middlewares/authMiddleware");
+
 const {
   createClinic,
   getClinics,
@@ -10,11 +13,16 @@ const {
   deleteClinic
 } = require("../controllers/coachClinicController");
 
-// ----- MULTER MEMORY STORAGE (untuk Cloudinary) -----
-const storage = multer.memoryStorage(); 
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "clinics",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"]
+  }
+});
+
 const upload = multer({ storage });
 
-// ----- ROUTES -----
 router.get("/", getClinics);
 router.get("/:id", getClinicById);
 router.post("/", protect, upload.single("image"), createClinic);

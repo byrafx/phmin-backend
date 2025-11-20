@@ -18,12 +18,12 @@ app.use(cors({
   origin: [
     "https://pickleballhouse.id",
     "https://www.pickleballhouse.id",
-    "https://pickleballhouse.id/pickleball",
-    "https://www.pickleballhouse.id/pickleball"
+    /\.pickleballhouse\.id$/
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
+  credentials: true
 }));
+
 
 
 app.use(express.json());

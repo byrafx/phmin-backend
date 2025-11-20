@@ -18,7 +18,8 @@ app.use(cors({
   origin: [
     "https://pickleballhouse.id",
     "https://www.pickleballhouse.id",
-    /\.pickleballhouse\.id$/
+    /\.pickleballhouse\.id$/,
+    "https://phmin-backend-production.up.railway.app" // TAMBAHKAN INI
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true

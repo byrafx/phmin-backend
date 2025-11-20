@@ -1,46 +1,62 @@
 const CoachClinic = require("../models/CoachClinic");
-const fs = require("fs");
-const path = require("path");
+const uploadToCloudinary = require("../utils/uploadToCloudinary");
 
 // CREATE
 exports.createClinic = async (req, res) => {
   try {
     const { title, coach, date, description } = req.body;
-    const image = req.file ? req.file.filename : null;
-    const clinic = new CoachClinic({ title, coach, date, description, image });
-    await clinic.save();
-    res.status(201).json({ ...clinic._doc, image_url: image ? `${req.protocol}://${req.get("host")}/uploads/${image}` : null });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+
+    let image_url = null;
+    if (req.file) {
+      image_url = await uploadToCloudinary(req.file.buffer, "phmin/clinics");
+    }
+
+    const clinic = await CoachClinic.create({
+      title,
+      coach,
+      date,
+      description,
+      image: image_url
+    });
+
+    res.status(201).json(clinic);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // READ all
 exports.getClinics = async (req, res) => {
   try {
     const clinics = await CoachClinic.find().sort({ createdAt: -1 });
-    res.json(clinics.map(c => ({ ...c._doc, image_url: c.image ? `${req.protocol}://${req.get("host")}/uploads/${c.image}` : null })));
-  } catch (err) { res.status(500).json({ message: err.message }); }
+    res.json(clinics);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // READ one
 exports.getClinicById = async (req, res) => {
   try {
     const clinic = await CoachClinic.findById(req.params.id);
-    if (!clinic) return res.status(404).json({ message: "Coach Clinic not found" });
-    res.json({ ...clinic._doc, image_url: clinic.image ? `${req.protocol}://${req.get("host")}/uploads/${clinic.image}` : null });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+    if (!clinic) return res.status(404).json({ message: "Clinic not found" });
+    res.json(clinic);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // UPDATE
 exports.updateClinic = async (req, res) => {
   try {
     const { title, coach, date, description } = req.body;
-    const clinic = await CoachClinic.findById(req.params.id);
-    if (!clinic) return res.status(404).json({ message: "Coach Clinic not found" });
 
-    if (req.file && clinic.image) {
-      const oldPath = path.join(__dirname, "../../uploads", clinic.image);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      clinic.image = req.file.filename;
+    const clinic = await CoachClinic.findById(req.params.id);
+    if (!clinic) return res.status(404).json({ message: "Clinic not found" });
+
+    // upload image baru
+    if (req.file) {
+      clinic.image = await uploadToCloudinary(req.file.buffer, "phmin/clinics");
     }
 
     clinic.title = title || clinic.title;
@@ -49,20 +65,21 @@ exports.updateClinic = async (req, res) => {
     clinic.description = description || clinic.description;
 
     await clinic.save();
-    res.json({ ...clinic._doc, image_url: clinic.image ? `${req.protocol}://${req.get("host")}/uploads/${clinic.image}` : null });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+    res.json(clinic);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // DELETE
 exports.deleteClinic = async (req, res) => {
   try {
     const clinic = await CoachClinic.findById(req.params.id);
-    if (!clinic) return res.status(404).json({ message: "Coach Clinic not found" });
-    if (clinic.image) {
-      const oldPath = path.join(__dirname, "../../uploads", clinic.image);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    }
+    if (!clinic) return res.status(404).json({ message: "Clinic not found" });
+
     await clinic.deleteOne();
-    res.json({ message: "Coach Clinic deleted" });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+    res.json({ message: "Clinic deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

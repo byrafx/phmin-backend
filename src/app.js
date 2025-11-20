@@ -13,23 +13,26 @@ const jadwalRoutes = require('./routes/jadwalRoutes');
 
 const app = express();
 
-// CORS FIX
+// CORS FIXED
 app.use(cors({
   origin: [
     "https://pickleballhouse.id",
     "https://www.pickleballhouse.id",
     /\.pickleballhouse\.id$/,
-    "https://phmin-backend-production.up.railway.app"
+    "https://phmin-backend-production.up.railway.app" // TAMBAHKAN INI
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- FIX UPLOAD STATIC PATH ---
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static uploads (not persistent on Railway!)
+const uploadPath = process.env.UPLOAD_PATH || 'uploads';
+app.use('/' + uploadPath, express.static(path.join(__dirname, '..', uploadPath)));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -44,11 +47,6 @@ app.use('/api/jadwal', jadwalRoutes);
 app.get('/api/test', (req, res) => res.send('Server OK'));
 
 // Home
-app.get('/', (req, res) => {
-  res.json({
-    ok: true,
-    message: 'PHMIN Backend is running'
-  });
-});
+app.get('/', (req, res) => res.json({ ok: true, message: 'PHMIN Backend is running' }));
 
 module.exports = app;

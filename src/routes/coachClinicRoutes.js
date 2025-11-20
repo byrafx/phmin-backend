@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
+const path = require("path");
 const protect = require("../middlewares/authMiddleware");
-
 const {
   createClinic,
   getClinics,
@@ -13,14 +11,10 @@ const {
   deleteClinic
 } = require("../controllers/coachClinicController");
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "clinics",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"]
-  }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join(__dirname, "../../uploads")),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
 });
-
 const upload = multer({ storage });
 
 router.get("/", getClinics);

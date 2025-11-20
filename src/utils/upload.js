@@ -1,21 +1,27 @@
-const { v2: cloudinary } = require("cloudinary");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const UPLOAD_PATH = process.env.UPLOAD_PATH || "uploads";
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "phmin", // Folder Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+// pastikan folder ada
+if (!fs.existsSync(UPLOAD_PATH)) fs.mkdirSync(UPLOAD_PATH);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOAD_PATH);
   },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif/;
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowedTypes.test(ext)) cb(null, true);
+  else cb(new Error("File type not allowed"), false);
+};
 
-module.exports = upload;
+module.exports = require("multer")({ storage, fileFilter });

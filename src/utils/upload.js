@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const UPLOAD_PATH = process.env.UPLOAD_PATH || "uploads";
 
-// Pastikan folder uploads ada
+// pastikan folder ada
 if (!fs.existsSync(UPLOAD_PATH)) fs.mkdirSync(UPLOAD_PATH);
 
 const storage = multer.diskStorage({
@@ -24,4 +24,4 @@ const fileFilter = (req, file, cb) => {
   else cb(new Error("File type not allowed"), false);
 };
 
-module.exports = multer({ storage, fileFilter });
+module.exports = require("multer")({ storage, fileFilter });

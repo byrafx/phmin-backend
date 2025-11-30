@@ -1,17 +1,30 @@
 const express = require("express");
 const router = express.Router();
-const productController = require("../controllers/productController");
-const authMiddleware = require("../middlewares/authMiddleware");
-const upload = require("../utils/upload");
+const path = require("path");
+const multer = require("multer");
+const protect = require("../middlewares/authMiddleware");
+const {
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct
+} = require("../controllers/productController");
 
-// semua route protected
-router.use(authMiddleware);
+// Setup multer storage sama kayak events
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join(__dirname, "../../uploads")),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+});
+const upload = multer({ storage });
 
-// CRUD routes
-router.post("/", upload.single("image"), productController.createProduct);
-router.get("/", productController.getProducts);
-router.get("/:id", productController.getProductById);
-router.put("/:id", upload.single("image"), productController.updateProduct);
-router.delete("/:id", productController.deleteProduct);
+// PUBLIC routes (FE landing page)
+router.get("/", getProducts);
+router.get("/:id", getProductById);
+
+// PROTECTED routes (admin dashboard)
+router.post("/", protect, upload.single("image"), createProduct);
+router.put("/:id", protect, upload.single("image"), updateProduct);
+router.delete("/:id", protect, deleteProduct);
 
 module.exports = router;
